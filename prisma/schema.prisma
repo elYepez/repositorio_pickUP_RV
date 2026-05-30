@@ -1,0 +1,178 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  PASSENGER
+  DRIVER
+  ADMIN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum RouteStatus {
+  ACTIVE
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum TripRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  password     String
+  role         UserRole
+  gender       Gender
+  profilePhoto String?
+  isVerified   Boolean  @default(false)
+  isSuspended  Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  driverProfile   DriverProfile?
+  routes          Route[]
+  tripRequests    TripRequest[]
+  ratingsGiven    Rating[]       @relation("RatingsGiven")
+  ratingsReceived Rating[]       @relation("RatingsReceived")
+
+  reportsMade     Report[] @relation("Reporter")
+  reportsReceived Report[] @relation("Reported")
+
+  notifications Notification[]
+}
+
+model DriverProfile {
+  id String @id @default(uuid())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  licenseNumber String
+  plateNumber   String
+  vehicleModel  String
+  vehicleColor  String
+
+  verified Boolean @default(false)
+
+  createdAt DateTime @default(now())
+}
+
+model Community {
+  id String @id @default(uuid())
+
+  name       String
+  university String
+  city       String
+
+  createdAt DateTime @default(now())
+}
+
+model Route {
+  id String @id @default(uuid())
+
+  driverId String
+  driver   User   @relation(fields: [driverId], references: [id])
+
+  origin      String
+  destination String
+
+  departureTime DateTime
+
+  availableSeats Int
+
+  price Float
+
+  genderPreference Gender?
+
+  status RouteStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+
+  tripRequests TripRequest[]
+}
+
+model TripRequest {
+  id String @id @default(uuid())
+
+  routeId String
+  route   Route  @relation(fields: [routeId], references: [id])
+
+  passengerId String
+  passenger   User   @relation(fields: [passengerId], references: [id])
+
+  message String?
+
+  status TripRequestStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+}
+
+model Rating {
+  id String @id @default(uuid())
+
+  fromUserId String
+  toUserId   String
+
+  fromUser User @relation("RatingsGiven", fields: [fromUserId], references: [id])
+  toUser   User @relation("RatingsReceived", fields: [toUserId], references: [id])
+
+  score   Int
+  comment String?
+
+  createdAt DateTime @default(now())
+}
+
+model Report {
+  id String @id @default(uuid())
+
+  reporterUserId String
+  reportedUserId String
+
+  reporter User @relation("Reporter", fields: [reporterUserId], references: [id])
+  reported User @relation("Reported", fields: [reportedUserId], references: [id])
+
+  reason      String
+  description String
+
+  status ReportStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  title   String
+  message String
+
+  read Boolean @default(false)
+
+  createdAt DateTime @default(now())
+}
