@@ -24,4 +24,31 @@ router.get(
   RoutesController.getAll
 );
 
+router.get(
+  "/my-routes",
+  authMiddleware,
+  RoutesController.myRoutes
+);
+
+router.get(
+  "/:id",
+  authMiddleware,
+  RoutesController.getById
+);
+
+
+
+router.patch(
+  "/:id/cancel",
+  authMiddleware,
+  RoutesController.cancel
+);
+
+router.patch(
+  "/:id/complete",
+  authMiddleware,
+  RoutesController.complete
+);
+
+
 export default router;

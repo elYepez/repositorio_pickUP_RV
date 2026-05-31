@@ -84,5 +84,42 @@ static async routeRequests(
     });
   }
 }
+static async reject(
+  req: Request,
+  res: Response
+) {
+  try {
+    const request =
+      await TripRequestsService.rejectRequest(
+        req.params.id,
+        req.user!.userId
+      );
+
+    res.json(request);
+  } catch (error: any) {
+    res.status(400).json({
+      message: error.message,
+    });
+  }
+}
+static async cancel(
+  req: Request,
+  res: Response
+) {
+  try {
+    const request =
+      await TripRequestsService.cancelRequest(
+        req.params.id,
+        req.user!.userId
+      );
+
+    res.json(request);
+  } catch (error: any) {
+    res.status(400).json({
+      message: error.message,
+    });
+  }
+}
+
 
 }

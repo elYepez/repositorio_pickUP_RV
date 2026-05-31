@@ -24,7 +24,13 @@ export class TripRequestsService {
         where: {
           passengerId,
           routeId,
-        },
+          status: {
+            in: [
+              "PENDING",
+              "ACCEPTED"
+            ]
+          }
+        }
       });
 
     if (existingRequest) {
